@@ -30,18 +30,18 @@ That said, all other inputs and behaviour run along the same lines as in the **[
 
 ## Usage
 
-module sub-network
-{
-    source                  = "github.com/devops4me/terraform-aws-sub-network"
+    module sub-network
+    {
+        source                  = "github.com/devops4me/terraform-aws-sub-network"
 
-    in_vpc_id               = "${ local.the_vpc_id }"
-    in_vpc_cidr             = "${ local.the_vpc_cidr }"
-    in_subnets_max          = "${ local.the_subnets_max }"
-    in_num_existing_subnets = "${ local.the_num_existing_subnets }"
+        in_vpc_id               = "${ local.the_vpc_id }"
+        in_vpc_cidr             = "${ local.the_vpc_cidr }"
+        in_subnets_max          = "${ local.the_subnets_max }"
+        in_num_existing_subnets = "${ local.the_num_existing_subnets }"
 
-    in_num_public_subnets   = 2
-    in_num_private_subnets  = 0
-}
+        in_num_public_subnets   = 2
+        in_num_private_subnets  = 0
+    }
 
 ---
 
