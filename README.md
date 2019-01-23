@@ -77,7 +77,7 @@ The subnet_address_power is the integer power of 2 that you got after increasing
 |  4087      |   4096       | **2<sup>12</sup>**               | 12                   | 10.111.0.0/16  |  16          | 32-(16+12) |  4         |
 
 
-### Simmple Formula
+### Simple Formula
 
 ### `subnet_max = 32 - ( vpc_cidr_int + subnet_address_power )`
 
