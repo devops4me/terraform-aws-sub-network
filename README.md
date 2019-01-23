@@ -77,9 +77,9 @@ The subnet_address_power is the integer power of 2 that you got after increasing
 |  4087      |   4096       | **2<sup>12</sup>**               | 12                   | 10.111.0.0/16  |  16          | 32-(16+12) |  4         |
 
 
-### Formula for deriving subnet max
+### Simmple Formula
 
-### `32 - ( vpc_cidr_int + subnet_address_power )`
+### `subnet_max = 32 - ( vpc_cidr_int + subnet_address_power )`
 
 A **common error** is to read the IPV4 Cidr from the subnets screen - don't! Read it from the VPC screen otherwise you are getting the Subnet's Cidr block which is **not the same as the VPC's Cidr** block.
 
