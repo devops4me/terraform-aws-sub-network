@@ -69,20 +69,20 @@ resource aws_subnet public
  | -- which must be created per availability zone.
  | --
 */
-resource aws_internet_gateway this
-{
-    count  = "${ var.in_create_public_gateway }"
+## --> resource aws_internet_gateway this
+## --> {
+## -->     count  = "${ var.in_create_public_gateway }"
 
-    vpc_id = "${ var.in_vpc_id }"
+## -->     vpc_id = "${ var.in_vpc_id }"
 
-    tags
-    {
-        Name  = "net-gateway-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Class = "${ var.in_ecosystem_name }"
-        Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc  = "This internet gateway for ${ var.in_ecosystem_name } ${ var.in_tag_description }"
-    }
-}
+## -->     tags
+## -->     {
+## -->         Name  = "net-gateway-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
+## -->         Class = "${ var.in_ecosystem_name }"
+## -->         Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
+## -->         Desc  = "This internet gateway for ${ var.in_ecosystem_name } ${ var.in_tag_description }"
+## -->     }
+## --> }
 
 
 /*
@@ -113,7 +113,7 @@ resource aws_nat_gateway this
 
     allocation_id = "${ element( aws_eip.nat_gw_ip.*.id, count.index ) }"
     subnet_id     = "${ element( aws_subnet.public.*.id, count.index ) }"
-    depends_on    = [ "aws_internet_gateway.this" ]
+#####    depends_on    = [ "aws_internet_gateway.this" ]
 
     tags
     {
@@ -142,7 +142,7 @@ resource aws_route public
 
     route_table_id         = "${ data.aws_vpc.existing.main_route_table_id }"
     destination_cidr_block = "0.0.0.0/0"
-    gateway_id             = "${ aws_internet_gateway.this.id }"
+    gateway_id             = "igw-00483068"
 }
 
 
@@ -194,7 +194,7 @@ resource aws_eip nat_gw_ip
     count = "${ var.in_num_private_subnets * var.in_create_private_gateway }"
 
     vpc        = true
-    depends_on = [ "aws_internet_gateway.this" ]
+#####    depends_on = [ "aws_internet_gateway.this" ]
 
     tags
     {
