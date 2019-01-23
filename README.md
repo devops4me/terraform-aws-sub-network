@@ -26,43 +26,24 @@ The above 3 variables must be provided along with the **ID of the existing VPC**
 
 That said, all other inputs and behaviour run along the same lines as in the **[VPC network](https://github.com/devops4me/terraform-aws-vpc-network)** sister module.
 
-
-
-
+---
 
 ## Usage
 
-    module vpc-network
-    {
-        source                 = "github.com/devops4me/terraform-aws-sub-network"
-        in_vpc_cidr            = "10.245.0.0/16"
-        in_num_private_subnets = 6
-        in_num_public_subnets  = 3
-        in_ecosystem           = "kubernetes-cluster"
-    }
+module sub-network
+{
+    source                  = "github.com/devops4me/terraform-aws-sub-network"
 
-    output subnet_ids
-    {
-        value = "${ module.vpc-network.out_subnet_ids }"
-    }
+    in_vpc_id               = "${ local.the_vpc_id }"
+    in_vpc_cidr             = "${ local.the_vpc_cidr }"
+    in_subnets_max          = "${ local.the_subnets_max }"
+    in_num_existing_subnets = "${ local.the_num_existing_subnets }"
 
-    output private_subnet_ids
-    {
-        value = "${ module.vpc-network.out_private_subnet_ids }"
-    }
+    in_num_public_subnets   = 2
+    in_num_private_subnets  = 0
+}
 
-    output public_subnet_ids
-    {
-        value = "${ module.vpc-network.out_public_subnet_ids }"
-    }
-
-
-The most common usage is to specify the VPC Cidr, the number of public / private subnets and the class of ecosystem being built.
-
-## [Examples and Tests](test-vpc.network)
-
-**[This terraform module has runnable example integration tests](test-vpc.network)**. Read the instructions on how to clone the project and run the integration tests.
-
+---
 
 ## Module Inputs
 
@@ -84,8 +65,8 @@ A subnet_max of 8 means you can have a maximum of **2<sup>8</sup>** (256) subnet
 
 To reverse engineer this value go to the AWS Console and
 
-- note the **trailing Cidr integer** on the IPV4 Cidr (from VPC screen) - it comes after the Cidr Block slash so is 20 if the cidr block is 10.42.0.0/20
-- note the **Available IPv4 (from the Subnet screen)** against your VPC.
+- note the **trailing Cidr integer** on the IPV4 Cidr column **on the VPC page** *( 20 if the cidr block is 10.42.0.0/20 )*
+- note the Available IPv4 column **on the subnet page** against your VPC.
 - increase the available IPv4 count until you arrive at the next power of 2
 
 The subnet_address_power is the integer power of 2 that you got after increasing the available ipv4 count.
