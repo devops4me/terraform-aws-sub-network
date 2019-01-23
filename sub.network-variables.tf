@@ -48,7 +48,7 @@ variable in_subnets_max
 }
 
 
-variable in_subnets_exist_count
+variable in_num_existing_subnets
 {
     description = "The number of subnets already carved out of the existing VPC to skip over."
 }

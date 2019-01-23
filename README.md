@@ -70,7 +70,7 @@ The most common usage is to specify the VPC Cidr, the number of public / private
 | **in_vpc_id**              | String  | The ID of the VPC to create subnet networks within.           | vpc-123456789  |
 | **in_vpc_cidr**            | String  | The VPC's Cidr defining the range of available IP addresses   | 10.42.0.0/16   |
 | **in_subnets_max**         | Integer | 2 to the power of this is the max number of carvable subnets  | 4 (16 subnets) |
-| **in_subnets_exist_count** | Integer | This existing subnet count plus the number of subnets to create must not exceed the maximum number of carvable subnets in this vpc. | mandatory |
+| **in_num_existing_subnets** | Integer | This number of existing subnets plus the number of subnets to create must not exceed the maximum number of carvable subnets in this vpc. It is fine for the value to exceed the actual number of existing subnets as long as there is sufficient headroom for the new subnets. | mandatory |
 | **in_num_private_subnets** | Integer | Number of private subnets to create across availability zones | 3              |
 | **in_num_public_subnets**  | Integer | Number of public subnets to create across availability zones. If one or more an internet gateway and route to the internet will be created regardless of the value of the in_create_gateway boolean variable. | 3 |
 | **in_create_gateway**      | Boolean | If set to true an internet gateway and route will be created even when no public subnets are requested. | false |

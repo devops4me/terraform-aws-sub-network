@@ -11,7 +11,7 @@ resource aws_subnet private
 {
     count = "${ var.in_num_private_subnets }"
 
-    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_subnets_exist_count + count.index ) }"
+    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_num_existing_subnets + count.index ) }"
     availability_zone = "${ element( data.aws_availability_zones.with.names, count.index ) }"
     vpc_id            = "${ var.in_vpc_id }"
 
@@ -19,10 +19,10 @@ resource aws_subnet private
 
     tags
     {
-        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_subnets_exist_count + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-x"
+        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_num_existing_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-x"
         Class    = "${ var.in_ecosystem_name }"
         Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc     = "Private subnet no.${ var.in_subnets_exist_count + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
+        Desc     = "Private subnet no.${ var.in_num_existing_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
     }
 
 }
@@ -40,7 +40,7 @@ resource aws_subnet public
 {
     count = "${ var.in_num_public_subnets }"
 
-    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_subnets_exist_count + var.in_num_private_subnets + count.index ) }"
+    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_num_existing_subnets + var.in_num_private_subnets + count.index ) }"
     availability_zone = "${ element( data.aws_availability_zones.with.names, count.index ) }"
     vpc_id            = "${ var.in_vpc_id }"
 
@@ -48,10 +48,10 @@ resource aws_subnet public
 
     tags
     {
-        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_subnets_exist_count + var.in_num_private_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-o"
+        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_num_existing_subnets + var.in_num_private_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-o"
         Class    = "${ var.in_ecosystem_name }"
         Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc     = "Public subnet no.${ var.in_subnets_exist_count + var.in_num_private_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
+        Desc     = "Public subnet no.${ var.in_num_existing_subnets + var.in_num_private_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
     }
 
 }
