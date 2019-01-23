@@ -7,11 +7,11 @@
 ### [[output]] out_vpc_id ###
 ### ##################### ###
 
-output out_vpc_id
-{
-    description = "This (string) vpc_id is the ID of the VPC that has just been created."
-    value       = "${aws_vpc.this_vpc.id}"
-}
+### ---> output out_vpc_id
+### ---> {
+### --->     description = "This (string) vpc_id is the ID of the VPC that has just been created."
+### --->     value       = "${aws_vpc.this_vpc.id}"
+### ---> }
 
 
 ### ######################### ###
