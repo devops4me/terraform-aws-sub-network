@@ -1,31 +1,5 @@
 
 /*
- | --
- | -- The Amazon VPC (virtual private cloud) is the container of choice
- | -- for subsystems and sometimes eco-systems.
- | --
- | -- The VPC is tied to a region (like London, Paris or Dublin) but
- | -- spans the (two to four) availability zones (data centres) within
- | -- the geographical auspices of the region.
- | --
-*/
-resource aws_vpc this_vpc
-{
-    cidr_block   = "${ var.in_vpc_cidr }"
-    enable_dns_support = true
-    enable_dns_hostnames = true
-
-    tags
-    {
-        Name   = "vpc-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Class = "${ var.in_ecosystem_name }"
-        Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc   = "This vpc for ${ var.in_ecosystem_name } ${ var.in_tag_description }"
-    }
-}
-
-
-/*
  | -- Round robin card dealing distribution of private subnets
  | -- across availability zones is done here.
  | --
@@ -37,18 +11,18 @@ resource aws_subnet private
 {
     count = "${ var.in_num_private_subnets }"
 
-    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, count.index ) }"
+    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_subnets_exist_count + count.index ) }"
     availability_zone = "${ element( data.aws_availability_zones.with.names, count.index ) }"
-    vpc_id            = "${ aws_vpc.this_vpc.id }"
+    vpc_id            = "${ var.in_vpc_id }"
 
     map_public_ip_on_launch = false
 
     tags
     {
-        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-x"
+        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_subnets_exist_count + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-x"
         Class    = "${ var.in_ecosystem_name }"
         Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc     = "Private subnet no.${ count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
+        Desc     = "Private subnet no.${ var.in_subnets_exist_count + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
     }
 
 }
@@ -66,18 +40,18 @@ resource aws_subnet public
 {
     count = "${ var.in_num_public_subnets }"
 
-    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_num_private_subnets + count.index ) }"
+    cidr_block        = "${ cidrsubnet( var.in_vpc_cidr, var.in_subnets_max, var.in_subnets_exist_count + var.in_num_private_subnets + count.index ) }"
     availability_zone = "${ element( data.aws_availability_zones.with.names, count.index ) }"
-    vpc_id            = "${ aws_vpc.this_vpc.id }"
+    vpc_id            = "${ var.in_vpc_id }"
 
     map_public_ip_on_launch = true
 
     tags
     {
-        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_num_private_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-o"
+        Name     = "subnet-${ var.in_ecosystem_name }-${ var.in_tag_timestamp }-${ format( "%02d", var.in_subnets_exist_count + var.in_num_private_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-o"
         Class    = "${ var.in_ecosystem_name }"
         Instance = "${ var.in_ecosystem_name }-${ var.in_tag_timestamp }"
-        Desc     = "Public subnet no.${ var.in_num_private_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
+        Desc     = "Public subnet no.${ var.in_subnets_exist_count + var.in_num_private_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_tag_description }"
     }
 
 }
@@ -99,7 +73,7 @@ resource aws_internet_gateway this
 {
     count  = "${ var.in_create_public_gateway }"
 
-    vpc_id = "${ aws_vpc.this_vpc.id }"
+    vpc_id = "${ var.in_vpc_id }"
 
     tags
     {
@@ -166,7 +140,7 @@ resource aws_route public
 {
     count  = "${ var.in_create_public_gateway }"
 
-    route_table_id         = "${ aws_vpc.this_vpc.default_route_table_id }"
+    route_table_id         = "${ data.aws_vpc.existing.main_route_table_id }"
     destination_cidr_block = "0.0.0.0/0"
     gateway_id             = "${ aws_internet_gateway.this.id }"
 }
@@ -242,7 +216,7 @@ resource aws_eip nat_gw_ip
 resource aws_route_table private
 {
     count = "${ var.in_num_private_subnets * var.in_create_private_gateway }"
-    vpc_id = "${ aws_vpc.this_vpc.id }"
+    vpc_id = "${ var.in_vpc_id }"
 
     tags
     {
