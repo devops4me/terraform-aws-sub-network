@@ -142,7 +142,7 @@ resource aws_route public
 
     route_table_id         = "${ data.aws_vpc.existing.main_route_table_id }"
     destination_cidr_block = "0.0.0.0/0"
-    gateway_id             = "igw-00483068"
+    gateway_id             = "${ var.in_net_gateway_id }"
 }
 
 
