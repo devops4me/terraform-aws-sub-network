@@ -26,33 +26,23 @@ data aws_availability_zones with
 }
 
 
-################ ############################################## ########
-################ Module [[[sub-network]]] Input Variables List. ########
-################ ############################################## ########
+######## ################### ########
+######## Mandatory Variables ########
+######## ################### ########
 
-variable in_vpc_id
-{
-    description = "The ID of the existing VPC in which to create the subnet network."
-}
+variable in_vpc_id { description = "The ID of the existing VPC in which to create the subnet network." }
+variable in_vpc_cidr { description = "The CIDr block defining the range of IP addresses allocated to this VPC." }
+variable in_subnets_max { description = "Two to the power of in_subnets_max is the ma number of subnets carvable from the VPC." }
+variable in_subnet_offset { description = "The number of subnets already carved out of the existing VPC to skip over." }
 
-
-variable in_vpc_cidr
-{
-    description = "The CIDr block defining the range of IP addresses allocated to this VPC."
-}
+variable in_ecosystem_name { description = "Creational stamp binding all infrastructure components created on behalf of this ecosystem instance." }
+variable in_tag_timestamp { description = "A timestamp for resource tags in the format ymmdd-hhmm like 80911-1435" }
+variable in_tag_description { description = "Ubiquitous note detailing who, when, where and why for every infrastructure component." }
 
 
-variable in_subnets_max
-{
-    description = "Two to the power of in_subnets_max is the ma number of subnets carvable from the VPC."
-}
-
-
-variable in_num_existing_subnets
-{
-    description = "The number of subnets already carved out of the existing VPC to skip over."
-}
-
+######## ################## ########
+######## Optional Variables ########
+######## ################## ########
 
 variable in_num_private_subnets
 {
@@ -79,22 +69,4 @@ variable in_create_private_gateway
 {
     description = "If private subnets exist an EIP, a NAT gateway, route and subnet association are created unless this variable is supplied as false."
     default     = true
-}
-
-
-variable in_ecosystem_name
-{
-    description = "Creational stamp binding all infrastructure components created on behalf of this ecosystem instance."
-}
-
-
-variable in_tag_timestamp
-{
-    description = "A timestamp for resource tags in the format ymmdd-hhmm like 80911-1435"
-}
-
-
-variable in_tag_description
-{
-    description = "Ubiquitous note detailing who, when, where and why for every infrastructure component."
 }

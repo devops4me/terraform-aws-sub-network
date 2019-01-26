@@ -32,12 +32,12 @@ That said, all other inputs and behaviour run along the same lines as in the **[
 
     module sub-network
     {
-        source                  = "github.com/devops4me/terraform-aws-sub-network"
+        source           = "github.com/devops4me/terraform-aws-sub-network"
 
-        in_vpc_id               = "${ local.the_vpc_id }"
-        in_vpc_cidr             = "${ local.the_vpc_cidr }"
-        in_subnets_max          = "${ local.the_subnets_max }"
-        in_num_existing_subnets = "${ local.the_num_existing_subnets }"
+        in_vpc_id        = "${ local.the_vpc_id }"
+        in_vpc_cidr      = "${ local.the_vpc_cidr }"
+        in_subnets_max   = "${ local.the_subnets_max }"
+        in_subnet_offset = "${ local.the_subnet_offset }"
 
         in_num_public_subnets   = 2
         in_num_private_subnets  = 0
@@ -52,7 +52,7 @@ That said, all other inputs and behaviour run along the same lines as in the **[
 | **in_vpc_id**              | String  | The ID of the VPC to create subnet networks within.           | vpc-123456789  |
 | **in_vpc_cidr**            | String  | The VPC's Cidr defining the range of available IP addresses   | 10.42.0.0/16   |
 | **in_subnets_max**         | Integer | 2 to the power of this integer is the **maximum number** of carvable subnets. **How do we reverse engineer this value?** See the section below this table. | 4 (16 subnets) |
-| **in_num_existing_subnets** | Integer | This number of existing subnets plus the number of subnets to create must not exceed the maximum number of carvable subnets in this vpc. It is fine for the value to exceed the actual number of existing subnets as long as there is sufficient headroom for the new subnets. | mandatory |
+| **in_subnet_offset** | Integer | The number of subnets to skip over which is usually the number of existing subnets. If **16 is the maximum number of subnets**, the offset must an integer from 0 to 15. This offset plus the number of subnets to create cannot exceed the number of carvable subnets. | mandatory |
 | **in_num_private_subnets** | Integer | Number of private subnets to create across availability zones | 3              |
 | **in_num_public_subnets**  | Integer | Number of public subnets to create across availability zones. If one or more an internet gateway and route to the internet will be created regardless of the value of the in_create_gateway boolean variable. | 3 |
 | **in_create_gateway**      | Boolean | If set to true an internet gateway and route will be created even when no public subnets are requested. | false |
