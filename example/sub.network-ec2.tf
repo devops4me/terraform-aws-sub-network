@@ -1,54 +1,69 @@
 
+### ---> ###################### <--- ### || < ####### > || ###
+### ---> ---------------------- <--- ### || < ------- > || ###
+### ---> Instance Layer Modules <--- ### || < Layer I > || ###
+### ---> ---------------------- <--- ### || < ------- > || ###
+### ---> ###################### <--- ### || < ####### > || ###
 
-/*
- | --
- | -- This module creates a VPC and then allocates subnets in a round robin manner
- | -- to each availability zone. For example if 8 subnets are required in a region
- | -- that has 3 availability zones - 2 zones will hold 3 subnets and the 3rd two.
- | --
- | -- Whenever and wherever public subnets are specified, this module knows to create
- | -- an internet gateway and a route out to the net.
- | --
-*/
+module ec2-instance {
+    source                  = "github.com/devops4me/terraform-aws-ec2-instance-cluster"
+
+    in_node_count           = "1"
+    in_user_data            = data.template_file.cloud_config.rendered
+    in_iam_instance_profile = module.ec2-instance-profile.out_ec2_instance_profile
+    in_ssh_public_key       = var.in_ssh_public_key
+
+    in_ami_id               = data.aws_ami.ubuntu-1804.id
+    in_subnet_ids           = [ element ( module.sub-network.out_public_subnet_ids, 0 ) ]
+    in_security_group_ids   = [ module.security-group.out_security_group_id ]
+
+    in_ecosystem_name       = var.in_ecosystem
+    in_tag_timestamp        = var.in_timestamp
+    in_tag_description      = var.in_description
+}
+
+module ec2-instance-profile {
+    source             = "github.com/devops4me/terraform-aws-ec2-instance-profile"
+    in_policy_stmts    = data.template_file.iam_policy_stmts.rendered
+
+    in_ecosystem_name  = var.in_ecosystem
+    in_tag_timestamp   = var.in_timestamp
+    in_tag_description = var.in_description
+}
+
+
+### ---> ##################### <--- ### || < ####### > || ###
+### ---> --------------------- <--- ### || < ------- > || ###
+### ---> Network Layer Modules <--- ### || < Layer N > || ###
+### ---> --------------------- <--- ### || < ------- > || ###
+### ---> ##################### <--- ### || < ####### > || ###
+
 module sub-network {
 
-    source                 = "./.."
-    in_vpc_cidr            = "10.88.0.0/16"
-    in_num_public_subnets  = 2
-    in_num_private_subnets = 0
+    source            = "./.."
+    in_vpc_id         = var.in_vpc_id
+    in_vpc_cidr       = var.in_vpc_cidr
+    in_net_gateway_id = var.in_gateway_id
+    in_subnets_max    = var.in_subnets_max
+    in_subnet_offset  = var.in_subnet_offset
 
-    in_ecosystem_name  = local.in_ecosystem
-    in_tag_timestamp   = local.in_timestamp
-    in_tag_description = local.in_description
+    in_num_public_subnets   = 1
+    in_num_private_subnets  = 0
+
+    in_ecosystem      = var.in_ecosystem
+    in_timestamp      = var.in_timestamp
+    in_description    = var.in_description
 }
 
-
-/*
- | --
- | -- You can do away with long repeating and hard to read security group
- | -- declarations in favour of a succinct one word security group rule
- | -- definition. This module understands the common traffic protocols like
- | -- ssh (22), https (443), sonarqube (9000), jenkins (8080) and so on.
- | --
-*/
 module security-group {
 
-    source     = "github.com/devops4me/terraform-aws-security-group"
-    in_ingress = [ "http", "https" ]
-    in_vpc_id  = module.vpc-network.out_vpc_id
+    source      = "github.com/devops4me/terraform-aws-security-group"
+    in_ingress  = [ "http", "https", "ssh" ]
+    in_vpc_id   = var.in_vpc_id
 
-    in_ecosystem_name  = local.in_ecosystem
-    in_tag_timestamp   = local.in_timestamp
-    in_tag_description = local.in_description
-}
-
-
-locals{
-
-    in_ecosystem = "elasticsearch"
-    in_timestamp = "190828"
-    in_description = "was created recently."
-
+    in_ecosystem_name  = var.in_ecosystem
+    in_tag_timestamp   = var.in_timestamp
+    in_tag_description = var.in_description
 }
 
 
