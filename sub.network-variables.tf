@@ -24,20 +24,41 @@ data aws_availability_zones with {
 }
 
 
-######## ################### ########
-######## Mandatory Variables ########
-######## ################### ########
-
-variable in_vpc_id { description = "The ID of the existing VPC in which to create the subnet network." }
-variable in_vpc_cidr { description = "The CIDr block defining the range of IP addresses allocated to this VPC." }
-variable in_subnets_max { description = "Two to the power of in_subnets_max is the ma number of subnets carvable from the VPC." }
-variable in_subnet_offset { description = "The number of subnets already carved out of the existing VPC to skip over." }
-variable in_net_gateway_id { description = "The internet gateway ID of the existing VPC." }
+##### ---> ########################## <--- #####
+##### ---> -------------------------- <--- #####
+##### ---> Mandatory Module Variables <--- #####
+##### ---> -------------------------- <--- #####
+##### ---> ########################## <--- #####
 
 
-######## ################## ########
-######## Optional Variables ########
-######## ################## ########
+variable in_vpc_id {
+   description = "The ID of the existing VPC in which to create the subnet network."
+}
+
+variable in_vpc_cidr {
+    description = "The CIDr block defining the range of IP addresses allocated to this VPC."
+}
+
+variable in_subnets_max {
+    description = "Two to the power of in_subnets_max is the ma number of subnets carvable from the VPC."
+}
+
+variable in_subnet_offset {
+    description = "The number of subnets already carved out of the existing VPC to skip over."
+}
+
+variable in_net_gateway_id {
+    description = "The internet gateway ID of the existing VPC."
+}
+
+
+
+##### ---> ######################### <--- #####
+##### ---> ------------------------- <--- #####
+##### ---> Optional Module Variables <--- #####
+##### ---> ------------------------- <--- #####
+##### ---> ######################### <--- #####
+
 
 variable in_num_private_subnets {
     description = "The number of private subnets to create (defaults to 3 if not specified)."

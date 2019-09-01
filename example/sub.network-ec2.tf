@@ -6,10 +6,10 @@
 ### ---> ###################### <--- ### || < ####### > || ###
 
 module ec2-instance {
+
     source                  = "github.com/devops4me/terraform-aws-ec2-instance-cluster"
 
     in_node_count           = "1"
-    in_user_data            = data.template_file.cloud_config.rendered
     in_iam_instance_profile = module.ec2-instance-profile.out_ec2_instance_profile
     in_ssh_public_key       = var.in_ssh_public_key
 
@@ -23,12 +23,16 @@ module ec2-instance {
 }
 
 module ec2-instance-profile {
-    source             = "github.com/devops4me/terraform-aws-ec2-instance-profile"
-    in_policy_stmts    = data.template_file.iam_policy_stmts.rendered
 
-    in_ecosystem_name  = var.in_ecosystem
-    in_tag_timestamp   = var.in_timestamp
-    in_tag_description = var.in_description
+    source = "github.com/devops4me/terraform-aws-ec2-instance-profile"
+
+    in_ec2_policy_stmts = data.template_file.ec2_policy_stmts.rendered
+    in_ecosystem_name   = var.in_ecosystem
+    in_tag_timestamp    = var.in_timestamp
+}
+
+data template_file ec2_policy_stmts {
+    template = file( "${path.module}/ec2-policies.json" )
 }
 
 
