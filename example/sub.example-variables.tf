@@ -21,7 +21,7 @@ variable in_subnet_offset {
     description = "The number of subnets already carved out of the existing VPC to skip over."
 }
 
-variable in_net_gateway_id {
+variable in_internet_gateway_id {
     description = "The internet gateway ID of the existing VPC."
 }
 

@@ -22,7 +22,7 @@ resource aws_subnet private {
             Name = "subnet-${ var.in_ecosystem }-${ var.in_timestamp }-${ format( "%02d", var.in_subnet_offset + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-x"
             Desc = "Private subnet no.${ var.in_subnet_offset + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_description }"
         },
-        var.in_mandatory_tags
+        var.in_mandated_tags
     )
 
 }
@@ -51,7 +51,7 @@ resource aws_subnet public {
             Name = "subnet-${ var.in_ecosystem }-${ var.in_timestamp }-${ format( "%02d", var.in_subnet_offset + var.in_num_private_subnets + count.index + 1 ) }-az${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) }-o"
             Desc = "Public subnet no.${ var.in_subnet_offset + var.in_num_private_subnets + count.index + 1 } within availability zone ${ element( split( "-", element( data.aws_availability_zones.with.names, count.index ) ), 2 ) } ${ var.in_description }"
         },
-        var.in_mandatory_tags
+        var.in_mandated_tags
     )
 }
 
@@ -92,7 +92,7 @@ resource aws_nat_gateway this {
             Name = "nat-gateway-${ var.in_ecosystem }-${ var.in_timestamp }"
             Desc = "This NAT gateway in public subnet ${ element( aws_subnet.public.*.id, count.index ) } for ${ var.in_ecosystem } ${ var.in_description }"
         },
-        var.in_mandatory_tags
+        var.in_mandated_tags
     )
 }
 
@@ -114,7 +114,7 @@ resource aws_route public {
 
     route_table_id         = data.aws_vpc.existing.main_route_table_id
     destination_cidr_block = "0.0.0.0/0"
-    gateway_id             = var.in_net_gateway_id
+    gateway_id             = var.in_internet_gateway_id
 }
 
 
@@ -174,7 +174,7 @@ resource aws_eip nat_gw_ip {
             Name = "elastic-ip-${ var.in_ecosystem }-${ var.in_timestamp }"
             Desc = "This elastic IP in public subnet ${ element( aws_subnet.public.*.id, count.index ) } for ${ var.in_ecosystem } ${ var.in_description }"
         },
-        var.in_mandatory_tags
+        var.in_mandated_tags
     )
 }
 
@@ -196,7 +196,7 @@ resource aws_route_table private {
             Name = "route-table-${ var.in_ecosystem }-${ var.in_timestamp }"
             Desc = "This route table associated with private subnet ${ element( aws_subnet.private.*.id, count.index ) } for ${ var.in_ecosystem } ${ var.in_description }"
         },
-        var.in_mandatory_tags
+        var.in_mandated_tags
     )
 
 }

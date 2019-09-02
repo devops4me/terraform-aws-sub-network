@@ -52,7 +52,7 @@ That said, all other inputs and behaviour run along the same lines as in the **[
 
         in_vpc_id         = var.in_vpc_id
         in_vpc_cidr       = var.in_vpc_cidr
-        in_net_gateway_id = var.in_gateway_id
+        in_internet_gateway_id = var.in_internet_gateway_id
         in_subnets_max    = var.in_subnets_max
         in_subnet_offset  = var.in_subnet_offset
 

@@ -47,7 +47,7 @@ variable in_subnet_offset {
     description = "The number of subnets already carved out of the existing VPC to skip over."
 }
 
-variable in_net_gateway_id {
+variable in_internet_gateway_id {
     description = "The internet gateway ID of the existing VPC."
 }
 
@@ -86,10 +86,10 @@ variable in_create_private_gateway {
 
 
 ### ############################## ###
-### [[variable]] in_mandatory_tags ###
+### [[variable]] in_mandated_tags ###
 ### ############################## ###
 
-variable in_mandatory_tags {
+variable in_mandated_tags {
 
     description = "Optional tags unless your organization mandates that a set of given tags must be set."
     type        = map

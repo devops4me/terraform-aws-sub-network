@@ -48,7 +48,7 @@ module sub-network {
 
     in_vpc_id         = var.in_vpc_id
     in_vpc_cidr       = var.in_vpc_cidr
-    in_net_gateway_id = var.in_gateway_id
+    in_internet_gateway_id = var.in_internet_gateway_id
     in_subnets_max    = var.in_subnets_max
     in_subnet_offset  = var.in_subnet_offset
 
