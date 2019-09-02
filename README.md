@@ -2,15 +2,31 @@
 #### Creating *new subnets* (and other network components) *within an existing VPC* is the primary function of this terraform module. This is in contrast to the [VPC Network terraform module](https://github.com/devops4me/terraform-aws-vpc-network) that does a similar job but *creates its own VPC* housing.
 
 
-# Create Subnet Network in Existing VPC
+# Create Subnets in an Existing VPC
+
+The first question is why? Before jumping into the **how** - let's uncover common use cases that would require you to setup infrastructure within an existing VPC.
+
+## *why* create subnet networks in an existing VPC?
+
+Why would you want to set out your (subnet) stalls within an existing VPC? **The common use cases are**
+
+- to place **performance test** infrastructure within an application's VPC
+- to setup a **bastion EC2 instance** in an existing VPC for troubleshooting
+- to setup a **green environment** for blue/green deployments
+- to reuse NAT gateways that are associated with mandated public elastic IP addresses
+- when you are not allowed to create new VPCs
+
+**That's the why!** Now Let's get to grips with **how** subnets sub-divide an address space and learn how to side-step the dreaded subnet address overlap issue.
+
+---
+
+## *how* to create subnet networks in an existing VPC
 
 Your **primary concern here** is to avoid a **subnet address overlap** scenario. The existing VPC will likely have subnets that have reserved and/or issued a certain number of IP addresses.
 
-#### *We don't want the new stepping on the toes of the old.*
+## module input variables
 
-## Understanding how Subnets Carve the IP Address Space
-
-To avoid the addressing overlap you need an understanding of
+This module is going to create a new subnet network within wthe auspices of an existing VPC. To do its work, you'll need to provide it with a handful of important **input variables** which are
 
 - the **VPC cidr block** (like 10.42.0.0/20) defines the entire VPC **allocable address range**
 - the **VPC cidr integer** comes after the Cidr Block slash so is 20 if the cidr block is 10.42.0.0/20
@@ -34,10 +50,11 @@ That said, all other inputs and behaviour run along the same lines as in the **[
     {
         source           = "github.com/devops4me/terraform-aws-sub-network"
 
-        in_vpc_id        = "${ local.the_vpc_id }"
-        in_vpc_cidr      = "${ local.the_vpc_cidr }"
-        in_subnets_max   = "${ local.the_subnets_max }"
-        in_subnet_offset = "${ local.the_subnet_offset }"
+        in_vpc_id         = var.in_vpc_id
+        in_vpc_cidr       = var.in_vpc_cidr
+        in_net_gateway_id = var.in_gateway_id
+        in_subnets_max    = var.in_subnets_max
+        in_subnet_offset  = var.in_subnet_offset
 
         in_num_public_subnets   = 2
         in_num_private_subnets  = 0
@@ -59,7 +76,34 @@ That said, all other inputs and behaviour run along the same lines as in the **[
 | **in_ecosystem**           | String  | the class name of the ecosystem being built here              | eco-system     |
 
 
-## subnets_max | How to Reverse Engineer its Value?
+It's easy to find the VPC ID, the VPC Cidr and the (internet or NAT) gateway IDs. That said, deriving two of the above values, needs further explanation. Those two values are
+
+1. the **subnets offset**
+1. the **subnets max**
+
+---
+
+## subnets offset | how to find the value
+
+To be blunt - we are gatecrashing an existing VPC. If subnets were market stalls, we are turning up and setting up some more market stalls. We can't set them up over the stalls that already exist, hence the offset.
+
+#### `subnet offset = number pf public subnets + number of private subnets`
+
+### Is there enough subnet headroom?
+
+The **number of existing subnets** plus the **number of required subnets** must not exceed the **maximum number of allocable subnets**.
+
+##### subnets example 
+
+- with 8 allocable subnets *and*
+- 6 existing subnets (subnet offset of 6)
+- you can only create 2 subnets
+
+This terraform module will fail durin the apply unless this constraint is respected.
+
+---
+
+## subnets max | how to derive the value
 
 A subnet_max of 8 means you can have a maximum of **2<sup>8</sup>** (256) subnets. 4 means your VPC can hold at most 16 subnets.When creating a network within an existing VPC you need to reverse engineer and provide the correct subnet max value to avoid overlap.
 
@@ -77,15 +121,25 @@ The subnet_address_power is the integer power of 2 that you got after increasing
 |  4087      |   4096       | **2<sup>12</sup>**               | 12                   | 10.111.0.0/16  |  16          | 32-(16+12) |  4         |
 
 
-### Simple Formula
-
 ### `subnet_max = 32 - ( vpc_cidr_int + subnet_address_power )`
 
 A **common error** is to read the IPV4 Cidr from the subnets screen - don't! Read it from the VPC screen otherwise you are getting the Subnet's Cidr block which is **not the same as the VPC's Cidr** block.
 
+
 ---
 
-## subnets max | addresses per subnet
+
+## the 3 golden questions | vpc and subnet design
+
+The fundamentals of **vpc and subnet design** boils down to asking (and answering) 3 golden questions.
+
+1. **how many addresses** can a **VPC** issue?
+1. **how many subnets** can be **carved out of** a **VPC**?
+1. **how many addresses** can a **subnet** issue?
+
+Use the below discussion to answer the 3 golden questions. Once you get the gist, you know the arithmetic that underpins VPC and subnet design.
+
+### subnet max and VPC Cidr
 
 The subnet max can combine with the VPC Cidr to define the number of **addresses available in each subnet's** pool.
 
@@ -93,7 +147,7 @@ The subnet max can combine with the VPC Cidr to define the number of **addresses
 
 A **vpc_cidr of 21 (eg 10.42.0.0/21)** and **subnets_max of 5** gives a pool of **2<sup>32-(21+5)</sup> = 64 addresses** in each subnet. (Note it is actually 2 less). We can carve out **2<sup>5</sup> = 32 subnets** as in_subnets_max is 5.
 
-### Dividing VPC Addresses into Subnet Blocks
+### slicing VPC addresses into subnet blocks
 
 | vpc cidr  | subnets max | number of addresses per subnet                          | max subnets                 | vpc addresses total                  |
 |:---------:|:-----------:|:------------------------------------------------------- |:--------------------------- |:------------------------------------ |
@@ -105,13 +159,3 @@ A **vpc_cidr of 21 (eg 10.42.0.0/21)** and **subnets_max of 5** gives a pool of 
 Check the below formula holds true for every row in the above table.
 
 <pre><code>addresses per subnet * number of subnets = total available VPC addresses</code></pre>
-
----
-
-## subnet cidr blocks | cidrsubnet function
-
-You do not need to specify each subnet's CIDR block because they are calculated by passing the VPC Cidr (in_vpc_cidr), the Subnets Max (in_subnets_max) and the present subnet's index (count.index) into Terraform's **cidrsubnet function**.
-
-The behaviour of Terraform's **cidrsubnet function** is involved but slightly outside the scope of this VPC/Subnet module document. Read **[Understanding the Terraform Cidr Subnet Function](http://www.devopswiki.co.uk/wiki/devops/terraform/terraform-cidrsubnet-function)** for a fuller coverage of cidrsubnet's behaviour.
-
----

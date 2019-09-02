@@ -9,7 +9,7 @@ module ec2-instance {
 
     source                  = "github.com/devops4me/terraform-aws-ec2-instance-cluster"
 
-    in_node_count           = "1"
+    in_node_count           = 1
     in_iam_instance_profile = module.ec2-instance-profile.out_ec2_instance_profile
     in_ssh_public_key       = var.in_ssh_public_key
 
@@ -44,19 +44,20 @@ data template_file ec2_policy_stmts {
 
 module sub-network {
 
-    source            = "./.."
+    source = "./.."
+
     in_vpc_id         = var.in_vpc_id
     in_vpc_cidr       = var.in_vpc_cidr
     in_net_gateway_id = var.in_gateway_id
     in_subnets_max    = var.in_subnets_max
     in_subnet_offset  = var.in_subnet_offset
 
-    in_num_public_subnets   = 1
-    in_num_private_subnets  = 0
+    in_num_public_subnets  = 1
+    in_num_private_subnets = 0
 
-    in_ecosystem      = var.in_ecosystem
-    in_timestamp      = var.in_timestamp
-    in_description    = var.in_description
+    in_ecosystem   = var.in_ecosystem
+    in_timestamp   = var.in_timestamp
+    in_description = var.in_description
 }
 
 module security-group {
@@ -71,13 +72,43 @@ module security-group {
 }
 
 
+/*
+ | --
+ | -- If you are using an IAM role as the AWS access mechanism then
+ | -- pass it as in_role_arn commonly through an environment variable
+ | -- named TF_VAR_in_role_arn in addition to the usual AWS access
+ | -- key, secret key and default region parameters.
+ | --
+*/
 provider aws {
-    assume_role {
-        role_arn = var.in_role_arn
+    dynamic assume_role {
+        for_each = length( var.in_role_arn ) > 0 ? [ var.in_role_arn ] : [] 
+        content {
+            role_arn = assume_role.value
+	}
     }
 }
 
 
-variable in_role_arn {
-    description = "The Role ARN to use when we assume role to implement the provisioning."
+/*
+ | --
+ | -- Use the AMI data filter to find the ID of the Ubuntu 18.04 image
+ | -- within the region that we are currently in.
+ | --
+*/
+data aws_ami ubuntu-1804 {
+
+    most_recent = true
+
+    filter {
+        name   = "name"
+        values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
+    }
+
+    filter {
+        name   = "virtualization-type"
+        values = [ "hvm" ]
+    }
+
+    owners = [ "099720109477" ]
 }
